@@ -1,0 +1,9 @@
+.query_tweets {
+    overflow: auto;
+    word-wrap: normal;
+    white-space: pre;
+}
+
+.hashtag-query {
+    white-space: pre-line;
+}

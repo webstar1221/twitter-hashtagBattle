@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+    <h2>Twitter REST API</h2>
+
+    <p>This is a collection of Twitter API operations, covering common use cases such as:
+
+    <ul>
+        <li><a href="/battle">Hashtag Battle</a>
+        <li><a href="/tweet">Post a Tweet</a>
+        <li><a href="/query">Query Tweets</a>
+        <li><a href="/media/photo">Upload photo</a>
+        <li><a href="/media/video">Upload video</a>
+        <li><a href="/profile">Update profile photo</a>
+    </ul>
+
+    <h2>Tools</h2>
+
+    <ul>
+        <li><a href="/media/inspector">Media Inspector.</a> Use this tool to get detailed information about your video files including format and stream information.</li>
+    </ul>
+
+    <h3>Twurl Library</h3>
+
+    <p>Twurl is like curl, but tailored specifically for the Twitter API.
+    It knows how to grant an access token to a client application for
+    a specified user and then sign all requests with that access token.</p>
+
+    <p>It also provides other development and debugging conveniences such
+    as defining aliases for common requests, as well as support for
+    multiple access tokens to easily switch between different client
+    applications and Twitter accounts.</p>
+
+    <p>You can learn more about Twurl by visiting the <a href="https://github.com/twitter/twurl" target="_target">Twurl Github repo</a>.
+
+{% endblock %}

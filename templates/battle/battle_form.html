@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Battle of Hashtags{% endblock %}
+
+{% block content %}
+
+    <form class="form-horizontal" method="post">
+        {% csrf_token %}
+
+        <h3 class="text-center"> Battle between two hashtags </h3>
+        <br>
+
+        <div class="row">
+            <div class="col-sm-offset-1 col-sm-5">
+                <div class="form-group">
+                    <label for="battle_name" class="col-sm-3 control-label text-right">Battle Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="battle_name" name="battle_name" placeholder="Type your battle name" {% if battle %} value="{{ battle.battle_name }}" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hashtag1" class="col-sm-3 control-label text-right">Hashtag1</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="hashtag1" name="hashtag1" placeholder="Type a hashtag: for example, #hashtag" {% if battle %} value="{{ battle.hashtag1 }}" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="hashtag2" class="col-sm-3 control-label text-right">Hashtag2</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="hashtag2" name="hashtag2" placeholder="Type a hashtag: for example, #hashtag" {% if battle %} value="{{ battle.hashtag2 }}" {% endif %}>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="form-group">
+                    <label for="started_at" class="col-sm-2 control-label text-right">Start Date</label>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" id="started_at" name="started_at" {% if battle %} value="{{ battle.started_at }}" {% endif %}>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="ended_at" class="col-sm-2 control-label text-right">End Date</label>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" id="ended_at" name="ended_at" {% if battle %} value="{{ battle.ended_at }}" {% endif %}>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-offset-2 col-sm-5">
+                <div class="form-group">
+                    <div class="col-sm-offset-1">
+                        <button type="submit" class="btn btn-primary">{% if battle %} Update {% else %} Create {% endif %} Battle</button>
+                        <a class="btn btn-default" href="{% url 'battle:battle_list' %}" style="margin-left: 5px;"><i class="fa fa-times"></i> Cancel</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+
+        ///////////////////////////////////////////////////////
+        // Start & End date configuration
+        ///////////////////////////////////////////////////////
+
+        var dateToDisable = new Date();
+	    dateToDisable.setDate(dateToDisable.getDate() - 7);
+
+        $('#started_at').datetimepicker({
+            format: 'Y-m-d',
+            timepicker: false,
+            minDate: dateToDisable,
+            onSelectDate: function(selected) { // if started_at is selected
+
+                var dt = new Date(selected);
+                dt.setDate(selected.getDate() + 1);
+                $('#ended_at').datetimepicker({
+                    minDate: dt
+                });
+            }
+        });
+
+        $('#started_at').focus( function() {  // if ended_at is empty
+
+            var dt = $('#ended_at').val();
+            if (!dt) {
+                $(this).datetimepicker({ maxDate: false });
+            }
+        });
+
+        $('#ended_at').datetimepicker({
+            format: 'Y-m-d',
+            timepicker: false,
+            minDate: dateToDisable,
+            onSelectDate: function(selected) { // if ended_at is selected
+
+                var dt = new Date(selected);
+                dt.setDate(selected.getDate() - 1);
+                $('#started_at').datetimepicker({
+                    maxDate: dt
+                });
+            }
+        });
+
+        $('#ended_at').focus( function() { // if started_at is empty
+
+            var dt = $('#started_at').val();
+            if (!dt) {
+                $(this).datetimepicker({ minDate: dateToDisable });
+            } else {
+                dt = new Date(dt);
+                dt.setDate(dt.getDate() + 1);
+                $(this).datetimepicker({ minDate: dt });
+            }
+        });
+
+    </script>
+{% endblock %}

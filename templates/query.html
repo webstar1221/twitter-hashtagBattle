@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Query tweets{% endblock %}
+
+{% block content %}
+
+    <p>Below is a query of your last {{ statuses|length }} tweets pulled from Twitter.</p>
+
+    <pre class="query_tweets">
+        {% if statuses and statuses.0 %}
+            <b>| count | time | id | retweet_count | favorite_count | is_retweet | in_reply_to_tweet_id | in_reply_to_screen_name | status | image | media_id_str |</b>
+            {% for s in statuses %}
+            | {{ forloop.counter }} | {{ s.created_at }} | <a href="http://twitter.com/{{s.user.screen_name}}/status/{{s.id}}" target="_target">{{s.id}}</a> | {{ s.retweet_count }} | {{ s.favorite_count }} | {{ s.retweeted }} | {% if s.in_reply_to_status_id %}{{ s.in_reply_to_status_id }}{% else %}False{% endif %} | {% if s.in_reply_to_screen_name %}<a href="http://twitter.com/{{s.in_reply_to_screen_name}}" target="_target">{{ s.in_reply_to_screen_name }}{% else %}False{% endif %}</a> | {{ s.text }} | {% if s.media.0 %}{{ s.media.0.media_url }}{% else %}False{% endif %} | {% if s.media.0 %}{{ s.media.0.id_str }}{% else %}False{% endif %} |
+            {% endfor %}
+        {% else %}
+            No statuses.
+        {% endif %}
+    </pre>
+
+{% endblock %}

@@ -1,0 +1,152 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Battle List{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-sm-offset-5 col-sm-2 text-center">
+            <h3 style="margin-top: 5px;">Battle List</h3>
+        </div>
+
+        <div class="col-sm-offset-4 col-sm-1 text-right">
+            <a class="btn btn-primary" href="{% url 'battle:battle_new' %}"><i class="fa fa-plus"></i> New</a>
+        </div>
+    </div>
+
+    <br>
+
+    <table class="table table-striped table-bordered">
+        <colgroup>
+            <col width="80"/>
+            <col width=""/>
+            <col width="150"/>
+            <col width="150"/>
+            <col width="100"/>
+            <col width="100"/>
+            <col width="80"/>
+            <col width="80"/>
+            <col width="80"/>
+            <col width="80"/>
+        </colgroup>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Hashtag1</th>
+                <th>Hashtag2</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th colspan="2">Status</th>
+                <th colspan="2">Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if object_list %}
+
+                {% for battle in object_list %}
+                    <tr>
+                        <td>BID.{{ battle.id }}</td>
+                        <td>{{ battle.battle_name }}</td>
+                        <td>{{ battle.hashtag1 }}</td>
+                        <td>{{ battle.hashtag2 }}</td>
+                        <td>{{ battle.started_at }}</td>
+                        <td>{{ battle.ended_at }}</td>
+                        {% if battle.status == 'Inactive' %}
+                        <td>
+                            <i style="color: #a94442;">{{ battle.status }}</i>
+                        </td>
+                        <td>
+                            <a style="color: #999999;"><i class="fa fa-eye"></i> Detail</a>
+                        </td>
+                        {% else %}
+                        <td>
+                            <i style="color: #0CB10F;">{{ battle.status }}</i>
+                        </td>
+                        <td>
+                            <a href="{% url 'battle:battle_detail' battle.id %}" style="color: #098E0C;"><i class="fa fa-eye"></i> Detail</a>
+                        </td>
+                        {% endif %}
+                        <td>
+                            <a href="{% url 'battle:battle_edit' battle.id %}"><i class="fa fa-pencil"></i> Edit</a>
+                        </td>
+                        <td>
+                            <a href="" data-id="{{ battle.id }}" data-toggle="modal" data-target="#delete_battle_modal" style="color: #FF0000;">
+                                <i class="fa fa-times"></i> Delete
+                            </a>
+                        </td>
+                    </tr>
+                {% endfor %}
+
+            {% else %}
+                <tr>
+                    <td colspan="10">
+                        <h4 class="text-center" style="color: #999999;"><i>There is no battle between hashtags.</i></h4>
+                    </td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+
+    <!-- delete-project modal -->
+    <div class="modal fade" id="delete_battle_modal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content" style="top: 100px;">
+                <form class="form-vertical" id="battle_delete_form" method="post">
+                    {% csrf_token %}
+
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                        <h4 class="modal-title">Delete Battle</h4>
+                    </div>
+                    <div class="modal-body">
+                        <div>
+                            <label>Are you sure to delete it? </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary">Delete</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" aria-label="Close">Cancel</button>
+                    </div>
+                </form>
+            </div><!-- /.modal-content -->
+        </div><!-- /.modal-dialog -->
+    </div><!-- /#delete_battle_modal -->
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        ///////////////////////////////////////////
+        // Delete Battle Modal JS
+        ///////////////////////////////////////////
+        $('#delete_battle_modal').on('submit', '#battle_delete_form', function () {
+
+            $.ajax({
+                type: $(this).attr('method'),
+                url: $(this).attr('action'),
+                data: $(this).serialize(),
+                success: function() { // on success..
+                    location.reload();
+                },
+                error: function(response) { // on error..
+                    alert(response);
+                }
+            });
+            return false;
+
+        });
+
+        // battle details url for deleting process
+        $('#delete_battle_modal').on('show.bs.modal', function(event) {
+
+            action_url = '/battle/delete/' + $(event.relatedTarget).data('id');
+            $("#battle_delete_form").attr("action", action_url);
+
+        });
+    </script>
+{% endblock %}

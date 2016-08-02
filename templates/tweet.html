@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Post a Tweet{% endblock %}
+
+{% block content %}
+
+    <form class="form-horizontal" action="/tweets" method="post">
+        {% csrf_token %}
+
+        <h3 class="text-center"> Post new Tweet </h3>
+        <br>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Status</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="status" name="status" placeholder="Type your question less than 140 characters here...">
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Tweet</button>
+            </div>
+        </div>
+
+        {% if response %}
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Raw Response</label>
+            <div class="col-sm-8">
+                <pre>{{response}}</pre>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="response_collapsible" class="col-sm-2 control-label">Formatted Response</label>
+            <div class="col-sm-8" id="response_collapsible"></div>
+        </div>
+        {% endif %}
+    </form>
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        renderjson.set_show_to_level(1);
+        document.getElementById("response_collapsible").appendChild(
+            {% autoescape off %}
+                renderjson({{response_pretty}})
+            {% endautoescape %}
+        );
+    </script>
+{% endblock %}

@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% load static %}
+{% load staticfiles %}
+{% load i18n %}
+
+{% block title %}Media Inspector{% endblock %}
+
+{% block content %}
+
+    <h2>Media Inspector</h2>
+
+    <p>Use this tool to get detailed information about a video file before using the Twitter API to upload and Tweet. This includes format and stream information, which is required for the @TwitterDev team to help diagnose and resolve issues.</p>
+
+    <p>If you are ready to use the <code>media/upload</code> endpoint, go to the <a href="/media/video">video upload examples</a> page.</p>
+
+    {% if not ffprobe_exists %}
+        <div class="alert alert-warning" role="alert">
+            You do not have ffprobe installed, which is a part of ffmpeg. Please <a href="https://ffmpeg.org/ffprobe.html" target="_target">click here</a> to learn more.
+        </div>
+    {% endif %}
+
+    <hr />
+
+    <form class="form-horizontal" action="/media/inspector" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-11">
+
+{#                <p>{{ form.non_field_errors }}</p>#}
+{#                <p>{{ form.file.label_tag }} {{ form.file.help_text }}</p>#}
+
+                <p>
+
+                    {{ form.file }}
+
+                    {% if request.method == 'POST' and not form.is_valid %}
+                    <div class="alert alert-danger" role="alert">
+                        <p>{{ form.file.errors }}</p>
+                    </div>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="col-sm-offset-1 col-sm-11">
+                <button type="submit" class="btn btn-primary">Upload Video</button>
+            </div>
+        </div>
+    </form>
+
+    {% if video_info %}
+    <div>
+        <div class="col-sm-6">
+            <h4>General Information</h4>
+            <table class="table">
+                <tr><td>Format (Long)</td><td>{{video_info.format.format_long_name}}</td></tr>
+                <tr><td>Format (Short)</td><td>{{video_info.format.format_name}}</td></tr>
+                <tr><td>Number of Streams</td><td>{{video_info.format.nb_streams}}</td></tr>
+                <tr><td>Duration</td><td>{{video_info.format.duration}}</td></tr>
+                <tr><td>Size (Bytes)</td><td>{{video_info.format.size}}</td></tr>
+                <tr><td>Bit Rate</td><td>{{video_info.format.bit_rate}}</td></tr>
+            </table>
+        </div>
+        <div class="col-sm-6">
+            <h4>Streams</h4>
+            {% for stream in video_info.streams %}
+                {% if stream.codec_type == 'video' %}
+                    <table class="table table-condensed">
+                        <tr><th colspan="2">Stream ({{stream.codec_type}})</th></tr>
+                        <tr><td>Codec (Long)</td><td>{{stream.codec_long_name}}</td></tr>
+                        <tr><td>Codec (Short)</td><td>{{stream.codec_name}}</td></tr>
+                        <tr><td>Dimensions</td><td>{{stream.width}}x{{stream.height}}</td></tr>
+                        <tr><td>Bit Rate</td><td>{{stream.bit_rate}}</td></tr>
+                        <tr><td>Duration</td><td>{{stream.duration}}</td></tr>
+                        <tr><td>Avg Frame Rate</td><td>{{stream.avg_frame_rate}}</td></tr>
+                    </table>
+                {% elif stream.codec_type == 'audio' %}
+                    <table class="table table-condensed">
+                        <tr><th colspan="2">Stream ({{stream.codec_type}})</th></tr>
+                        <tr><td>Codec (Long)</td><td>{{stream.codec_long_name}}</td></tr>
+                        <tr><td>Codec (Short)</td><td>{{stream.codec_name}}</td></tr>
+                        <tr><td>Bit Rate</td><td>{{stream.bit_rate}}</td></tr>
+                        <tr><td>Duration</td><td>{{stream.duration}}</td></tr>
+                        <tr><td>Sample Rate</td><td>{{stream.sample_rate}}</td></tr>
+                    </table>
+                {% else %}
+                    <table class="table table-condensed">
+                        <tr><th>Stream</th></tr>
+                        <tr><td><pre>{{stream}}</pre></td></tr>
+                    </table>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div>
+        <h4>Raw Response</h4>
+        <div id="video-format-collapsible"></div>
+    </div>
+    {% endif %}
+
+    {% if video_metadata %}
+    <h4>Video Metadata</h4>
+    <div>
+        <pre>
+            {{video_metadata}}
+        </pre>
+    </div>
+    {% endif %}
+
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        renderjson.set_show_to_level(1);
+        document.getElementById("video-format-collapsible").appendChild(
+            {% autoescape off %}
+                renderjson({{video_info_pretty}})
+            {% endautoescape %}
+        );
+    </script>
+{% endblock %}

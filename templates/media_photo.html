@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block title %}Upload media{% endblock %}
+
+{% block content %}
+
+    <form class="form-horizontal" action="/media/photo" method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <h3 class="text-center">Compose new Tweet & Photo</h3>
+        <br>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Status</label>
+            <div class="col-sm-8">
+                <input type="text" class="form-control" id="status" name="status" placeholder="Type your question less than 140 characters here...">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Add Photo</label>
+            <div class="col-sm-10">
+
+{#                <p>{{ form.non_field_errors }}</p>#}
+{#                <p>{{ form.file.label_tag }} {{ form.file.help_text }}</p>#}
+
+                <p>
+                    {{ form.file }}
+
+                    {% if request.method == 'POST' and not form.is_valid %}
+                    <div class="alert alert-danger" role="alert">
+                        <p>{{ form.file.errors }}</p>
+                    </div>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="inputEmail3" class="col-sm-2 control-label">Upload type</label>
+            <div class="col-sm-2">
+                <select name="media_type" class="form-control">
+                    <option value="binary">media (binary)</option>
+                    <option value="base64">media_data (base64)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-sm-offset-2 col-sm-10">
+                <button type="submit" class="btn btn-primary">Upload media</button>
+            </div>
+        </div>
+
+        {% if response.media %}
+        <div class="form-group">
+            <label for="response_media" class="col-sm-2 control-label">Media upload response</label>
+            <div class="col-sm-8" id="response_media">
+                <pre>
+                    {{response.tweet}}
+                </pre>
+            </div>
+        </div>
+        {% endif %}
+
+        {% if response.tweet %}
+        <div class="form-group">
+            <label for="response_tweet" class="col-sm-2 control-label">Tweet response</label>
+            <div class="col-sm-8" id="response_tweet"></div>
+        </div>
+        {% endif %}
+
+        {% if metadata %}
+        <div class="form-group">
+            <label for="media_metadata" class="col-sm-2 control-label">Media metadata</label>
+            <div class="col-sm-8" id="media_metadata"></div>
+            <div class="col-sm-8">
+                <pre>
+                    {% for line in metadata %}
+                        {{line}}
+                    {% endfor %}
+                </pre>
+            </div>
+        </div>
+        {% endif %}
+    </form>
+
+{% endblock %}
+
+{% block extra_script %}
+    <script>
+        renderjson.set_show_to_level(1);
+
+        var response_media = document.getElementById("response_media");
+        if (response_media) {
+            response_media.appendChild(
+                {% autoescape off %}
+                    renderjson({{response.media}})
+                {% endautoescape %}
+            );
+        }
+    </script>
+{% endblock %}
